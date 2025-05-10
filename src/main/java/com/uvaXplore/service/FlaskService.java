@@ -36,7 +36,7 @@ public class FlaskService {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
         ResponseEntity<Map> response = new RestTemplate().postForEntity(
-                flaskUrl + "/api/v1/process",
+                flaskUrl + "/api/v1/processStart",
                 requestEntity,
                 Map.class
         );
