@@ -33,7 +33,7 @@ public class ResourceService {
             TextDto textDto = new TextDto();
             textDto.setAll_text((String) flaskResponse.get("all_text"));
             textDto.setFirst_two_text((String) flaskResponse.get("first_two_text"));
-
+            textDto.setSummarize_text((String) flaskResponse.get("summarize_text"));
             return ResponseEntity.ok(textDto);
 
         } catch (Exception e) {
