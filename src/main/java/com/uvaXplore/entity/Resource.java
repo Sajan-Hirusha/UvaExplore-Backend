@@ -24,7 +24,7 @@ public class Resource {
     private String courseId;
 
     @Enumerated(EnumType.STRING)
-    private ResourceType type; // 'Research' or 'Project'
+    private ResourceType type;
 
     private String categoryId;
 
@@ -42,6 +42,8 @@ public class Resource {
     private String publication;
 
     private String googleDocLink;
+
+    private String sourceCodePath;
 
     @Convert(converter = FloatArrayToStringConverter.class)
     @Column(columnDefinition = "vector(384)")
