@@ -29,4 +29,15 @@ public class ResourceController {
         return resourceService.extractTextFromPdf(file);
     }
 
+        @GetMapping("/fetchSummary/{requestId}")
+    public ResponseEntity<TextDto> fetchSummarizedText(@PathVariable("requestId") String requestId) {
+        try {
+            return resourceService.fetchSummarizedText(requestId);
+
+        } catch (Exception e) {
+            logger.error("Error during fetching summary: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 }

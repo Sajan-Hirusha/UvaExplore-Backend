@@ -21,8 +21,7 @@ public class FlaskService {
     @Value("${flask.service.url}")
     private String flaskUrl;
 
-    public Map<String, Object>  processPdf(MultipartFile file) throws IOException {
-
+    public Map<String, Object> processPdf(MultipartFile file) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
@@ -42,5 +41,15 @@ public class FlaskService {
         );
 
         return response.getBody();
+    }
+
+    public String getSummary(String requestId) {
+        ResponseEntity<Map> response = new RestTemplate().getForEntity(
+                flaskUrl + "/api/v1/getSummary/" + requestId,
+                Map.class
+        );
+
+        Map<String, Object> responseBody = response.getBody();
+        return (String) responseBody.get("summarize_text");
     }
 }
