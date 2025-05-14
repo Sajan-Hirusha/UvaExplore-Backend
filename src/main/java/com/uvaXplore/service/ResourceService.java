@@ -52,9 +52,8 @@ public class ResourceService {
         try {
             String summarizeText = flaskService.getSummary(requestId);
             TextDto textDto = new TextDto();
+            textDto.setStatus(summarizeText != null ? "complete" : "processing");
             textDto.setSummarize_text(summarizeText);
-            textDto.setStatus("complete");
-
             return ResponseEntity.ok(textDto);
 
         } catch (Exception e) {
