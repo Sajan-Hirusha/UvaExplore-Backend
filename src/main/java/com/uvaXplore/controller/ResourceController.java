@@ -1,6 +1,5 @@
 package com.uvaXplore.controller;
 
-
 import com.uvaXplore.dto.TextDto;
 import com.uvaXplore.service.ResourceService;
 import org.slf4j.Logger;
