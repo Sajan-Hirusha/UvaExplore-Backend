@@ -1,5 +1,7 @@
 package com.uvaXplore.controller;
 
+import com.uvaXplore.dto.ResourceCreateDto;
+import com.uvaXplore.dto.ResourceResponseDto;
 import com.uvaXplore.dto.TextDto;
 import com.uvaXplore.service.ResourceService;
 import org.slf4j.Logger;
@@ -20,6 +22,10 @@ public class ResourceController {
         this.resourceService = resourceService;
     }
 
+    @PostMapping
+    public ResponseEntity<ResourceResponseDto> createResource(@RequestBody ResourceCreateDto dto) {
+        return ResponseEntity.ok(resourceService.createResource(dto));
+    }
 
     @PostMapping("/extractText")
     public ResponseEntity<TextDto> uploadPdf(

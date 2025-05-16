@@ -2,7 +2,6 @@ package com.uvaXplore.dto;
 
 import com.uvaXplore.entity.Resource;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,9 +15,10 @@ public class ResourceCreateDto {
     private String abstractText;
     private String publication;
     private String googleDocLink;
-    private MultipartFile pdfFile;
-    private List<MultipartFile> images;
+    private String documentUrl;
+    private List<String> imageUrls;
     private List<ContributorDto> contributors;
-    private SupervisorDto supervisor;
-    private SupervisorDto coSupervisor;
+    private String supervisorEnrollment;
+    private String coSupervisorEnrollment;
+
 }

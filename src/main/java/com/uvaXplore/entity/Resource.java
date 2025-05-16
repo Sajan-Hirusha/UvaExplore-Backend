@@ -52,6 +52,14 @@ public class Resource {
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ResourceContributor> contributors = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "supervisor_enrollment", referencedColumnName = "enrollmentNumber")
+    private User supervisor;
+
+    @ManyToOne
+    @JoinColumn(name = "co_supervisor_enrollment", referencedColumnName = "enrollmentNumber")
+    private User coSupervisor;
+
     public enum ResourceType {
         Research,
         Project
