@@ -1,7 +1,6 @@
 package com.uvaXplore.entity;
 
 import com.uvaXplore.middleware.FloatArrayToStringConverter;
-import com.uvaXplore.middleware.StringArrayConverter;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -50,6 +49,8 @@ public class Resource {
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ResourceImage> images = new ArrayList<>();
 
+    @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ResourceContributor> contributors = new ArrayList<>();
 
     public enum ResourceType {
         Research,
