@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -16,10 +18,6 @@ public class Resource {
     private Long resourceId;
 
     private String title;
-
-    @Convert(converter = StringArrayConverter.class)
-    @Column(length = 1000)
-    private String[] imageUrl;
 
     private String courseId;
 
@@ -48,6 +46,10 @@ public class Resource {
     @Convert(converter = FloatArrayToStringConverter.class)
     @Column(columnDefinition = "vector(384)")
     private float[] embedding;
+
+    @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ResourceImage> images = new ArrayList<>();
+
 
     public enum ResourceType {
         Research,
