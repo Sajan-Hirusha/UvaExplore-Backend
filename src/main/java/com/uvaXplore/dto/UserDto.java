@@ -13,6 +13,11 @@ public class UserDto {
     private String email;
     private String role;
     private String phoneNumber;
-    private String passowrd;
+    private String password;
+
+
+    public UserDto(String errorMessage) {
+        this.name = errorMessage;
+    }
 }
 

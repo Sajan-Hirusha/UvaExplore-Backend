@@ -2,6 +2,7 @@ package com.uvaXplore.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Table(name = "users") // Change the table name to "users" instead of "user"
 public class User {
 
     @Id
@@ -18,5 +20,5 @@ public class User {
     private String email;
     private String role;
     private String phoneNumber;
-    private String passowrd;
+    private String password;
 }
