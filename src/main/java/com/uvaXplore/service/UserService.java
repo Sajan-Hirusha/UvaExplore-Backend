@@ -5,6 +5,7 @@ import com.uvaXplore.entity.User;
 import com.uvaXplore.repo.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 @Service
@@ -16,13 +17,20 @@ public class UserService {
 
     private ModelMapper modelMapper;
 
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
+
     public UserDto saveUser(UserDto userDto) {
         try {
-            System.out.println("UserService"+userDto);
+
+//            String hashedPassword = passwordEncoder.encode(userDto.getPassword());
+//            System.out.println("hash password"+hashedPassword);
+//            userDto.setPassword(hashedPassword);
+//            System.out.println("after hashing"+userDto);
             userRepository.save(modelMapper.map(userDto, User.class));
-            System.out.println("After Repo");
             return userDto;
         } catch (Exception e) {
+            System.out.println("error" + e);
             throw new RuntimeException("Failed to save user", e);
         }
     }

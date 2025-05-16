@@ -23,9 +23,9 @@ public class UserController {
     @PostMapping("/saveUser")
     public ResponseEntity<UserDto> addUser(@RequestBody UserDto user) {
         try {
-            System.out.println("incoming"+user);
+            System.out.println("request user"+user);
             UserDto savedUser = userService.saveUser(user);
-            System.out.println("final"+savedUser);
+            System.out.println("final response"+savedUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
