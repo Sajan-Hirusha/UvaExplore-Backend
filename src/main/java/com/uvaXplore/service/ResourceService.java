@@ -12,24 +12,18 @@ import com.uvaXplore.repo.ResourceRepository;
 import com.uvaXplore.repo.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Service
 public class ResourceService {
@@ -44,6 +38,7 @@ public class ResourceService {
     @Autowired
     private UserRepository userRepository;
 
+    private final ModelMapper modelMapper;
     // Step 1: Extract the first two lines and all text
     public ResponseEntity<TextDto> extractTextFromPdf(MultipartFile file) {
         try {
@@ -79,81 +74,99 @@ public class ResourceService {
         }
     }
 
+
+
     @Transactional
     public ResourceResponseDto createResource(ResourceCreateDto dto) {
-        Resource resource = new Resource();
+        // Validate input
+        if (dto == null) {
+            throw new IllegalArgumentException("Resource data cannot be null");
+        }
 
-        // Set basic fields
-        resource.setTitle(dto.getTitle());
-        resource.setCourseId(dto.getCourseId());
-        resource.setType(dto.getType());
-        resource.setCategoryId(dto.getCategoryId());
-        resource.setDegree(dto.getDegree());
-        resource.setAbstractText(dto.getAbstractText());
-        resource.setPublication(dto.getPublication());
-        resource.setGoogleDocLink(dto.getGoogleDocLink());
+        // Map from DTO to Entity
+        Resource resource = modelMapper.map(dto, Resource.class);
         resource.setUploadAt(LocalDateTime.now());
         resource.setIsVerified(false);
 
-        // Set document URL from Firebase
-        resource.setDocumentPath(dto.getDocumentUrl());
+        // Process relationships that need special handling
+        processRelationships(dto, resource);
 
-        // Handle images from Firebase URLs
-        if (dto.getImageUrls() != null && !dto.getImageUrls().isEmpty()) {
-            List<ResourceImage> images = dto.getImageUrls().stream()
+        // Save resource
+        Resource savedResource = resourceRepository.save(resource);
+
+        // Map to response DTO
+        return mapToResponseDto(savedResource);
+    }
+
+    private void processRelationships(ResourceCreateDto dto, Resource resource) {
+        // Process images
+        if (dto.getImageUrls() != null) {
+            resource.setImages(dto.getImageUrls().stream()
                     .map(url -> {
                         ResourceImage image = new ResourceImage();
                         image.setUrl(url);
                         image.setResource(resource);
                         return image;
                     })
-                    .collect(Collectors.toList());
-            resource.setImages(images);
+                    .collect(Collectors.toList()));
         }
 
-        // Handle contributors
+        // Process contributors
         if (dto.getContributors() != null) {
-            List<ResourceContributor> contributors = dto.getContributors().stream()
+            resource.setContributors(dto.getContributors().stream()
                     .map(contributorDto -> {
                         User user = userRepository.findById(contributorDto.getEnrollmentNumber())
-                                .orElseGet(() -> {
-                                    // Create new user if not exists (optional)
-                                    User newUser = new User();
-                                    newUser.setEnrollmentNumber(contributorDto.getEnrollmentNumber());
-                                    newUser.setName(contributorDto.getName());
-                                    newUser.setEmail(contributorDto.getEmail());
-                                    newUser.setRole("STUDENT");
-                                    return userRepository.save(newUser);
-                                });
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                        "Contributor not found: " + contributorDto.getEnrollmentNumber()));
 
                         ResourceContributor contributor = new ResourceContributor();
                         contributor.setResource(resource);
                         contributor.setUser(user);
-                        contributor.setRole("AUTHOR"); // Default role or from DTO
+                        contributor.setRole(contributorDto.getRole());
                         return contributor;
                     })
-                    .collect(Collectors.toList());
-            resource.setContributors(contributors);
+                    .collect(Collectors.toList()));
         }
 
-        // Handle supervisor
+        // Process supervisor
         if (dto.getSupervisorEnrollment() != null && !dto.getSupervisorEnrollment().isEmpty()) {
             User supervisor = userRepository.findById(dto.getSupervisorEnrollment())
-                    .orElseThrow(() -> new IllegalArgumentException("Supervisor not found"));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Supervisor not found: " + dto.getSupervisorEnrollment()));
             validateLecturerRole(supervisor);
             resource.setSupervisor(supervisor);
         }
 
-        // Handle co-supervisor
+        // Process co-supervisor
         if (dto.getCoSupervisorEnrollment() != null && !dto.getCoSupervisorEnrollment().isEmpty()) {
             User coSupervisor = userRepository.findById(dto.getCoSupervisorEnrollment())
-                    .orElseThrow(() -> new IllegalArgumentException("Co-supervisor not found"));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Co-supervisor not found: " + dto.getCoSupervisorEnrollment()));
             validateLecturerRole(coSupervisor);
             resource.setCoSupervisor(coSupervisor);
         }
+    }
 
-        Resource savedResource = resourceRepository.save(resource);
-        return mapToResponseDto(savedResource);
+    private ResourceResponseDto mapToResponseDto(Resource resource) {
+        // Configure custom mappings if needed
+        modelMapper.typeMap(Resource.class, ResourceResponseDto.class)
+                .addMappings(mapper -> {
+                    mapper.map(src -> src.getDocumentPath(), ResourceResponseDto::setDocumentUrl);
+                    mapper.map(src -> src.getSupervisor(), ResourceResponseDto::setSupervisor);
+                    mapper.map(src -> src.getCoSupervisor(), ResourceResponseDto::setCoSupervisor);
+                });
+
+        // Perform the mapping
+        ResourceResponseDto response = modelMapper.map(resource, ResourceResponseDto.class);
+
+        // Map collections separately if needed
+        if (resource.getImages() != null) {
+            response.setImageUrls(resource.getImages().stream()
+                    .map(ResourceImage::getUrl)
+                    .collect(Collectors.toList()));
+        }
+
+        return response;
     }
 
     private void validateLecturerRole(User user) {
