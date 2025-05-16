@@ -33,7 +33,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);  
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
