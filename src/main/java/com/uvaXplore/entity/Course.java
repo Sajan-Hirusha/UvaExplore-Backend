@@ -9,7 +9,7 @@ public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int courseId;
+    private Integer courseId;
 
     private String name;
 

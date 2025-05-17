@@ -27,7 +27,9 @@ public class ResourceResponseDto {
     private String status;
     private String message;
     private LocalDateTime timestamp;
-
+    private String courseName;
+    private String degreeName;
+    private String categoryName;
 
     @Data
     public static class ContributorResponseDto {

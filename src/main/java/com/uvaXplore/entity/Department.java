@@ -8,7 +8,7 @@ import lombok.Data;
 public class Department {
 
     @Id
-    private int departmentId;
+    private Integer departmentId;
 
     private String name;
 

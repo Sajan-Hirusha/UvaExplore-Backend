@@ -10,8 +10,8 @@ public class ResourceCreateDto {
     private String title;
     private String courseId;
     private Resource.ResourceType type;
-    private String categoryId;
-    private String degree;
+    private Integer categoryId;
+    private String degreeId;
     private String abstractText;
     private String publication;
     private String googleDocLink;

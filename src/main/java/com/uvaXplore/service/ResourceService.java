@@ -4,12 +4,10 @@ import com.uvaXplore.dto.ContributorDto;
 import com.uvaXplore.dto.ResourceCreateDto;
 import com.uvaXplore.dto.ResourceResponseDto;
 import com.uvaXplore.dto.TextDto;
-import com.uvaXplore.entity.Resource;
-import com.uvaXplore.entity.ResourceContributor;
-import com.uvaXplore.entity.ResourceImage;
-import com.uvaXplore.entity.User;
-import com.uvaXplore.repo.ResourceRepository;
-import com.uvaXplore.repo.UserRepository;
+import com.uvaXplore.entity.*;
+import com.uvaXplore.exception.BusinessRuleException;
+import com.uvaXplore.repo.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -32,13 +31,20 @@ public class ResourceService {
 
     @Autowired
     private FlaskService flaskService;
-
     @Autowired
     private ResourceRepository resourceRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private final CourseRepository courseRepository;
+    @Autowired
+    private final DegreeRepository degreeRepository;
+    @Autowired
+    private final CategoryRepository categoryRepository;
 
     private final ModelMapper modelMapper;
+
+
     // Step 1: Extract the first two lines and all text
     public ResponseEntity<TextDto> extractTextFromPdf(MultipartFile file) {
         try {
@@ -76,7 +82,6 @@ public class ResourceService {
 
 
 
-    @Transactional
     public ResourceResponseDto createResource(ResourceCreateDto dto) {
         // Validate input
         if (dto == null) {
@@ -84,13 +89,14 @@ public class ResourceService {
         }
 
         logger.info("Creating resource: {}", dto);
-        // Map from DTO to Entity
+
+        // Map and validate main resource
         Resource resource = modelMapper.map(dto, Resource.class);
         resource.setUploadAt(LocalDateTime.now());
         resource.setIsVerified(false);
 
-        // Process relationships that need special handling
-        processRelationships(dto, resource);
+        // Validate and set relationships
+        validateAndSetRelationships(dto, resource);
 
         // Save resource
         Resource savedResource = resourceRepository.save(resource);
@@ -99,7 +105,24 @@ public class ResourceService {
         return mapToResponseDto(savedResource);
     }
 
-    private void processRelationships(ResourceCreateDto dto, Resource resource) {
+    private void validateAndSetRelationships(ResourceCreateDto dto, Resource resource) {
+        // Validate and set course
+        Course course = courseRepository.findById(dto.getCourseId())
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with id: " + dto.getCourseId()));
+        resource.setCourse(course);
+
+        // Validate and set degree
+        Degree degree = degreeRepository.findById(dto.getDegreeId())
+                .orElseThrow(() -> new EntityNotFoundException("Degree not found with id: " + dto.getDegreeId()));
+        resource.setDegree(degree);
+
+        // Set category if provided
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.getCategoryId()));
+            resource.setCategory(category);
+        }
+
         // Process images
         if (dto.getImageUrls() != null) {
             resource.setImages(dto.getImageUrls().stream()
@@ -117,8 +140,8 @@ public class ResourceService {
             resource.setContributors(dto.getContributors().stream()
                     .map(contributorDto -> {
                         User user = userRepository.findById(contributorDto.getEnrollmentNumber())
-                                .orElseThrow(() -> new IllegalArgumentException(
-                                        "Contributor not found: " + contributorDto.getEnrollmentNumber()));
+                                .orElseThrow(() -> new EntityNotFoundException(
+                                        "User not found with enrollment: " + contributorDto.getEnrollmentNumber()));
 
                         ResourceContributor contributor = new ResourceContributor();
                         contributor.setResource(resource);
@@ -130,42 +153,55 @@ public class ResourceService {
         }
 
         // Process supervisor
-        if (dto.getSupervisorEnrollment() != null && !dto.getSupervisorEnrollment().isEmpty()) {
+        if (StringUtils.hasText(dto.getSupervisorEnrollment())) {
             User supervisor = userRepository.findById(dto.getSupervisorEnrollment())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Supervisor not found: " + dto.getSupervisorEnrollment()));
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Supervisor not found with enrollment: " + dto.getSupervisorEnrollment()));
             validateLecturerRole(supervisor);
             resource.setSupervisor(supervisor);
         }
 
         // Process co-supervisor
-        if (dto.getCoSupervisorEnrollment() != null && !dto.getCoSupervisorEnrollment().isEmpty()) {
+        if (StringUtils.hasText(dto.getCoSupervisorEnrollment())) {
             User coSupervisor = userRepository.findById(dto.getCoSupervisorEnrollment())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Co-supervisor not found: " + dto.getCoSupervisorEnrollment()));
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Co-supervisor not found with enrollment: " + dto.getCoSupervisorEnrollment()));
             validateLecturerRole(coSupervisor);
             resource.setCoSupervisor(coSupervisor);
         }
-
-
     }
 
     private ResourceResponseDto mapToResponseDto(Resource resource) {
-        // Configure custom mappings if needed
+        // Configure ModelMapper
         modelMapper.typeMap(Resource.class, ResourceResponseDto.class)
                 .addMappings(mapper -> {
-                    mapper.map(src -> src.getDocumentPath(), ResourceResponseDto::setDocumentUrl);
-                    mapper.map(src -> src.getSupervisor(), ResourceResponseDto::setSupervisor);
-                    mapper.map(src -> src.getCoSupervisor(), ResourceResponseDto::setCoSupervisor);
+                    mapper.map(Resource::getDocumentPath, ResourceResponseDto::setDocumentUrl);
+                    mapper.map(src -> src.getCourse().getName(), ResourceResponseDto::setCourseName);
+                    mapper.map(src -> src.getDegree().getName(), ResourceResponseDto::setDegreeName);
+                    mapper.map(src -> src.getCategory() != null ? src.getCategory().getName() : null,
+                            ResourceResponseDto::setCategoryName);
                 });
 
         // Perform the mapping
         ResourceResponseDto response = modelMapper.map(resource, ResourceResponseDto.class);
 
-        // Map collections separately if needed
+        // Map images
         if (resource.getImages() != null) {
             response.setImageUrls(resource.getImages().stream()
                     .map(ResourceImage::getUrl)
+                    .collect(Collectors.toList()));
+        }
+
+        // Map contributors
+        if (resource.getContributors() != null) {
+            response.setContributors(resource.getContributors().stream()
+                    .map(contributor -> {
+                        ResourceResponseDto.ContributorResponseDto dto = new ResourceResponseDto.ContributorResponseDto();
+                        dto.setEnrollmentNumber(contributor.getUser().getEnrollmentNumber());
+                        dto.setName(contributor.getUser().getName());
+                        dto.setRole(contributor.getRole());
+                        return dto;
+                    })
                     .collect(Collectors.toList()));
         }
 
@@ -177,10 +213,9 @@ public class ResourceService {
             throw new IllegalArgumentException("User cannot be null");
         }
         if (!"LECTURER".equalsIgnoreCase(user.getRole())) {
-            throw new IllegalArgumentException(
+            throw new BusinessRuleException(
                     "User with enrollment " + user.getEnrollmentNumber() +
-                            " must have LECTURER role. Current role: " + user.getRole()
-            );
+                            " must have LECTURER role. Current role: " + user.getRole());
         }
     }
 }
