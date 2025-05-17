@@ -48,9 +48,9 @@ public class Resource {
 
     private String sourceCodePath;
 
-//    @Convert(converter = FloatArrayToStringConverter.class)
-//    @Column(columnDefinition = "vector(384)")
-//    private float[] embedding;
+    @Convert(converter = FloatArrayToStringConverter.class)
+    @Column(columnDefinition = "vector(384)")
+    private float[] embedding;
 
 
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
