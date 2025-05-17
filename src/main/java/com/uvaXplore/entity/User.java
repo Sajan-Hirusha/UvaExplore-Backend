@@ -21,4 +21,5 @@ public class User {
     private String role;
     private String phoneNumber;
     private String password;
+    private boolean isRestricted = false;
 }
