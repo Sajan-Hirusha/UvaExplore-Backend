@@ -5,14 +5,14 @@ import lombok.Data;
 
 @Entity
 @Data
-public class Degree {
+public class Department {
 
     @Id
-    private String degreeId;
+    private String departmentId;
 
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "department_id")
-    private Department department;
+    @JoinColumn(name = "faculty_id")
+    private Faculty faculty;
 }
