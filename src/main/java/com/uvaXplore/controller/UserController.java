@@ -11,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/user")
 public class UserController {
 
@@ -43,5 +45,24 @@ public class UserController {
                     .body(null);
         }
 
+    }
+
+    @PutMapping ("/updateRestriction/{encodedEnrollmentNumber}")
+    public ResponseEntity<?> updateUserRestriction(
+            @PathVariable String encodedEnrollmentNumber,
+            @RequestBody Map<String, Boolean> restrictionMap) {
+        System.out.println("Backend"+encodedEnrollmentNumber+restrictionMap);
+        Boolean isRestricted = restrictionMap.get("isRestricted");
+        if (isRestricted == null) {
+            return ResponseEntity.badRequest().body("Missing isRestricted value");
+        }
+
+        try {
+            userService.updateUserRestriction(encodedEnrollmentNumber, isRestricted);
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
     }
 }

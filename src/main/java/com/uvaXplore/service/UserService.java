@@ -51,4 +51,12 @@ public class UserService {
             throw new RuntimeException("Failed to get users", e);
         }
     }
+
+    public void updateUserRestriction(String enrollmentNumber, boolean isRestricted) {
+        User user = userRepository.findById(enrollmentNumber)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setIsRestricted(isRestricted);
+        userRepository.save(user);
+    }
 }
