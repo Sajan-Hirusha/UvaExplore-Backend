@@ -81,14 +81,10 @@ public class ResourceService {
 
     @Transactional
     public ResourceResponseDto createResource(ResourceCreateDto dto) {
-        // Validate input
         if (dto == null) {
             throw new IllegalArgumentException("Resource data cannot be null");
         }
 
-        logger.info("Creating resource: {}", dto);
-
-        // Create new resource and manually set all fields
         Resource resource = new Resource();
         resource.setTitle(dto.getTitle());
         resource.setType(dto.getType());
@@ -99,10 +95,6 @@ public class ResourceService {
         resource.setUploadAt(LocalDateTime.now());
         resource.setIsVerified(false);
         resource.setGithubLink(dto.getGithubLink());
-        logger.info("Resource created: {}", dto.getAbstractText());
-        // Validate and set relationships
-
-        logger.info("Generating embedding from abstract text...");
 
         try {
             float[] embeddingArray = flaskService.generateEmbedding(dto.getAbstractText());
@@ -113,11 +105,7 @@ public class ResourceService {
         }
 
         validateAndSetRelationships(dto, resource);
-
-        // Save resource
         Resource savedResource = resourceRepository.save(resource);
-
-        // Map to response DTO
         return mapToResponseDto(savedResource);
     }
 
@@ -166,7 +154,6 @@ public class ResourceService {
                         ResourceContributor contributor = new ResourceContributor();
                         contributor.setResource(resource);
                         contributor.setUser(user);
-                        contributor.setRole(contributorDto.getRole());
                         return contributor;
                     })
                     .collect(Collectors.toList()));
@@ -230,7 +217,6 @@ public class ResourceService {
                         ResourceResponseDto.ContributorResponseDto dto = new ResourceResponseDto.ContributorResponseDto();
                         dto.setEnrollmentNumber(contributor.getUser().getEnrollmentNumber());
                         dto.setName(contributor.getUser().getName());
-                        dto.setRole(contributor.getRole());
                         return dto;
                     })
                     .collect(Collectors.toList()));
