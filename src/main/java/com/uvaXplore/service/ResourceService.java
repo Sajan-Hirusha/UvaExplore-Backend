@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 @AllArgsConstructor
 @Service
 public class ResourceService {
@@ -42,7 +41,6 @@ public class ResourceService {
     private final CategoryRepository categoryRepository;
 
     private final ModelMapper modelMapper;
-
 
     // Step 1: Extract the first two lines and all text
     public ResponseEntity<TextDto> extractTextFromPdf(MultipartFile file) {
@@ -79,7 +77,6 @@ public class ResourceService {
         }
     }
 
-
     @Transactional
     public ResourceResponseDto createResource(ResourceCreateDto dto) {
         // Validate input
@@ -89,11 +86,18 @@ public class ResourceService {
 
         logger.info("Creating resource: {}", dto);
 
-        // Map and validate main resource
-        Resource resource = modelMapper.map(dto, Resource.class);
+        // Create new resource and manually set all fields
+        Resource resource = new Resource();
+        resource.setTitle(dto.getTitle());
+        resource.setType(dto.getType());
+        resource.setAbstractText(dto.getAbstractText());
+        resource.setPublication(dto.getPublication());
+        resource.setGoogleDocLink(dto.getGoogleDocLink());
+        resource.setDocumentPath(dto.getDocumentPath());
         resource.setUploadAt(LocalDateTime.now());
         resource.setIsVerified(false);
-
+        resource.setGithubLink(dto.getGithubLink());
+logger.info("Resource created: {}", dto.getAbstractText());
         // Validate and set relationships
         validateAndSetRelationships(dto, resource);
 
@@ -106,14 +110,18 @@ public class ResourceService {
 
     private void validateAndSetRelationships(ResourceCreateDto dto, Resource resource) {
         // Validate and set course
-        Course course = courseRepository.findById(dto.getCourseId())
-                .orElseThrow(() -> new EntityNotFoundException("Course not found with id: " + dto.getCourseId()));
-        resource.setCourse(course);
+        if (dto.getCourseId() != null) {
+            Course course = courseRepository.findById(dto.getCourseId())
+                    .orElseThrow(() -> new EntityNotFoundException("Course not found with id: " + dto.getCourseId()));
+            resource.setCourse(course);
+        }
 
         // Validate and set degree
-        Degree degree = degreeRepository.findById(dto.getDegreeId())
-                .orElseThrow(() -> new EntityNotFoundException("Degree not found with id: " + dto.getDegreeId()));
-        resource.setDegree(degree);
+        if (dto.getDegreeId() != null) {
+            Degree degree = degreeRepository.findById(dto.getDegreeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Degree not found with id: " + dto.getDegreeId()));
+            resource.setDegree(degree);
+        }
 
         // Set category if provided
         if (dto.getCategoryId() != null) {
@@ -171,18 +179,29 @@ public class ResourceService {
     }
 
     private ResourceResponseDto mapToResponseDto(Resource resource) {
-        // Configure ModelMapper
-        modelMapper.typeMap(Resource.class, ResourceResponseDto.class)
-                .addMappings(mapper -> {
-                    mapper.map(Resource::getDocumentPath, ResourceResponseDto::setDocumentUrl);
-                    mapper.map(src -> src.getCourse().getName(), ResourceResponseDto::setCourseName);
-                    mapper.map(src -> src.getDegree().getName(), ResourceResponseDto::setDegreeName);
-                    mapper.map(src -> src.getCategory() != null ? src.getCategory().getName() : null,
-                            ResourceResponseDto::setCategoryName);
-                });
+        ResourceResponseDto response = new ResourceResponseDto();
 
-        // Perform the mapping
-        ResourceResponseDto response = modelMapper.map(resource, ResourceResponseDto.class);
+        // Map basic fields
+        response.setResourceId(resource.getResourceId());
+        response.setTitle(resource.getTitle());
+        response.setType(resource.getType());
+        response.setAbstractText(resource.getAbstractText());
+        response.setPublication(resource.getPublication());
+        response.setGoogleDocLink(resource.getGoogleDocLink());
+        response.setDocumentUrl(resource.getDocumentPath());
+        response.setUploadAt(resource.getUploadAt());
+        response.setIsVerified(resource.getIsVerified());
+
+        // Map relationships
+        if (resource.getCourse() != null) {
+            response.setCourseName(resource.getCourse().getName());
+        }
+        if (resource.getDegree() != null) {
+            response.setDegreeName(resource.getDegree().getName());
+        }
+        if (resource.getCategory() != null) {
+            response.setCategoryName(resource.getCategory().getName());
+        }
 
         // Map images
         if (resource.getImages() != null) {
