@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -97,8 +99,19 @@ public class ResourceService {
         resource.setUploadAt(LocalDateTime.now());
         resource.setIsVerified(false);
         resource.setGithubLink(dto.getGithubLink());
-logger.info("Resource created: {}", dto.getAbstractText());
+        logger.info("Resource created: {}", dto.getAbstractText());
         // Validate and set relationships
+
+        logger.info("Generating embedding from abstract text...");
+
+        try {
+            float[] embeddingArray = flaskService.generateEmbedding(dto.getAbstractText());
+            resource.setEmbedding(embeddingArray);
+        } catch (IOException e) {
+            logger.error("Failed to generate embedding: {}", e.getMessage(), e);
+            throw new RuntimeException("Embedding generation failed", e);
+        }
+
         validateAndSetRelationships(dto, resource);
 
         // Save resource

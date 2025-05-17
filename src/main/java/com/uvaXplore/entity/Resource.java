@@ -1,8 +1,13 @@
 package com.uvaXplore.entity;
 
+import com.pgvector.PGvector;
 import com.uvaXplore.middleware.FloatArrayToStringConverter;
+//import com.uvaXplore.middleware.VectorConverter;
+import com.uvaXplore.middleware.VectorType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Type;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +53,7 @@ public class Resource {
 
     private String sourceCodePath;
 
-    @Convert(converter = FloatArrayToStringConverter.class)
+    @Type(VectorType.class)
     @Column(columnDefinition = "vector(384)")
     private float[] embedding;
 
