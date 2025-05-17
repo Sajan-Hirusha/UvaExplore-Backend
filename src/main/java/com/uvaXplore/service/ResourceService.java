@@ -1,6 +1,5 @@
 package com.uvaXplore.service;
 
-import com.uvaXplore.dto.ContributorDto;
 import com.uvaXplore.dto.ResourceCreateDto;
 import com.uvaXplore.dto.ResourceResponseDto;
 import com.uvaXplore.dto.TextDto;
@@ -81,7 +80,7 @@ public class ResourceService {
     }
 
 
-
+    @Transactional
     public ResourceResponseDto createResource(ResourceCreateDto dto) {
         // Validate input
         if (dto == null) {

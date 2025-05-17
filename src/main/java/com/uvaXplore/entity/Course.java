@@ -8,8 +8,8 @@ import lombok.Data;
 public class Course {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer courseId;
+    @Column(length = 50)
+    private String courseId;
 
     private String name;
 
