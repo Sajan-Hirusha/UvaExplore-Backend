@@ -1,10 +1,13 @@
 package com.uvaXplore.service;
 
+import com.uvaXplore.dto.ContributorDto;
 import com.uvaXplore.dto.ResourceCreateDto;
 import com.uvaXplore.dto.ResourceResponseDto;
 import com.uvaXplore.dto.TextDto;
-import com.uvaXplore.entity.*;
-import com.uvaXplore.repo.DegreeRepository;
+import com.uvaXplore.entity.Resource;
+import com.uvaXplore.entity.ResourceContributor;
+import com.uvaXplore.entity.ResourceImage;
+import com.uvaXplore.entity.User;
 import com.uvaXplore.repo.ResourceRepository;
 import com.uvaXplore.repo.UserRepository;
 import jakarta.transaction.Transactional;
@@ -36,10 +39,6 @@ public class ResourceService {
     private UserRepository userRepository;
 
     private final ModelMapper modelMapper;
-
-    @Autowired
-    private DegreeRepository degreeRepository;
-
     // Step 1: Extract the first two lines and all text
     public ResponseEntity<TextDto> extractTextFromPdf(MultipartFile file) {
         try {
@@ -148,11 +147,7 @@ public class ResourceService {
             resource.setCoSupervisor(coSupervisor);
         }
 
-        if (dto.getDegreeId() != null) {
-            Degree degree = degreeRepository.findById(dto.getDegreeId())
-                    .orElseThrow(() -> new IllegalArgumentException("Degree not found: " + dto.getDegreeId()));
-            resource.setDegree(degree);
-        }
+
     }
 
     private ResourceResponseDto mapToResponseDto(Resource resource) {
