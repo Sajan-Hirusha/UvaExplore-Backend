@@ -3,7 +3,6 @@ package com.uvaXplore.entity;
 import com.uvaXplore.middleware.FloatArrayToStringConverter;
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +22,13 @@ public class Resource {
     @Enumerated(EnumType.STRING)
     private ResourceType type;
 
-    private String categoryId;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    private String degree;
+    @ManyToOne
+    @JoinColumn(name = "degree_id")
+    private Degree degree;
 
     @Column(length = 3000)
     private String abstractText;

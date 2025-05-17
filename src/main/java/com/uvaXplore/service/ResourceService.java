@@ -83,6 +83,7 @@ public class ResourceService {
             throw new IllegalArgumentException("Resource data cannot be null");
         }
 
+        logger.info("Creating resource: {}", dto);
         // Map from DTO to Entity
         Resource resource = modelMapper.map(dto, Resource.class);
         resource.setUploadAt(LocalDateTime.now());
