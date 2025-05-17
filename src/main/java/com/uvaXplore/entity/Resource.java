@@ -13,11 +13,13 @@ public class Resource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long resourceId;
+    private int resourceId;
 
     private String title;
 
-    private String courseId;
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
 
     @Enumerated(EnumType.STRING)
     private ResourceType type;

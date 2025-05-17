@@ -8,7 +8,7 @@ import lombok.Data;
 public class Category {
 
     @Id
-    private String categoryId;
+    private int categoryId;
 
     private String name;
 
