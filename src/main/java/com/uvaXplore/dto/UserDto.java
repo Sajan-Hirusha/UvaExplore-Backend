@@ -14,6 +14,7 @@ public class UserDto {
     private String role;
     private String phoneNumber;
     private String password;
+    private boolean isRestricted = false;
 
 
     public UserDto(String errorMessage) {
