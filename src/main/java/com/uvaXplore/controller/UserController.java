@@ -10,12 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/user")
 public class UserController {
 
@@ -47,18 +48,19 @@ public class UserController {
 
     }
 
-    @PutMapping ("/updateRestriction/{encodedEnrollmentNumber}")
+    @PutMapping("/updateRestriction")
     public ResponseEntity<?> updateUserRestriction(
-            @PathVariable String encodedEnrollmentNumber,
-            @RequestBody Map<String, Boolean> restrictionMap) {
-        System.out.println("Backend"+encodedEnrollmentNumber+restrictionMap);
-        Boolean isRestricted = restrictionMap.get("isRestricted");
-        if (isRestricted == null) {
-            return ResponseEntity.badRequest().body("Missing isRestricted value");
+            @RequestBody Map<String, Object> requestBody) {
+
+        String enrollmentNumber = (String) requestBody.get("enrollmentNumber");
+        Boolean isRestricted = (Boolean) requestBody.get("isRestricted");
+
+        if (enrollmentNumber == null || isRestricted == null) {
+            return ResponseEntity.badRequest().body("Missing required parameters");
         }
 
         try {
-            userService.updateUserRestriction(encodedEnrollmentNumber, isRestricted);
+            userService.updateUserRestriction(enrollmentNumber, isRestricted);
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
