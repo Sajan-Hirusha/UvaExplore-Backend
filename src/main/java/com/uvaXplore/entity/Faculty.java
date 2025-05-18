@@ -8,6 +8,7 @@ import lombok.Data;
 public class Faculty {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer facultyId;
 
     private String name;
