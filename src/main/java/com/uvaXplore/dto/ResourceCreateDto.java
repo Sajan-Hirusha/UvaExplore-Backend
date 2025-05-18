@@ -9,16 +9,17 @@ import java.util.List;
 public class ResourceCreateDto {
     private String title;
     private String courseId;
+    private Integer categoryId;
+    private String degreeId;
     private Resource.ResourceType type;
-    private String categoryId;
-    private String degree;
     private String abstractText;
     private String publication;
     private String googleDocLink;
-    private String documentUrl;
+    private String documentPath;
     private List<String> imageUrls;
     private List<ContributorDto> contributors;
     private String supervisorEnrollment;
     private String coSupervisorEnrollment;
+    private String githubLink;
 
 }

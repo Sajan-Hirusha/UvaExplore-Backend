@@ -1,8 +1,12 @@
 package com.uvaXplore.entity;
 
+import com.pgvector.PGvector;
 import com.uvaXplore.middleware.FloatArrayToStringConverter;
+//import com.uvaXplore.middleware.VectorConverter;
+import com.uvaXplore.middleware.VectorType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,14 +22,20 @@ public class Resource {
 
     private String title;
 
-    private String courseId;
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
 
     @Enumerated(EnumType.STRING)
     private ResourceType type;
 
-    private String categoryId;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    private String degree;
+    @ManyToOne
+    @JoinColumn(name = "degree_id")
+    private Degree degree;
 
     @Column(length = 3000)
     private String abstractText;
@@ -39,12 +49,14 @@ public class Resource {
     private String publication;
 
     private String googleDocLink;
+    private String githubLink;
 
     private String sourceCodePath;
 
-    @Convert(converter = FloatArrayToStringConverter.class)
+    @Type(VectorType.class)
     @Column(columnDefinition = "vector(384)")
     private float[] embedding;
+
 
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ResourceImage> images = new ArrayList<>();

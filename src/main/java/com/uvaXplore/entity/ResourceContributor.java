@@ -18,6 +18,4 @@ public class ResourceContributor {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    private String role; // Can be "author", "editor", etc.
 }
