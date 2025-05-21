@@ -1,4 +1,4 @@
-package com.uvaXplore.entity;
+package com.AcademicStructures.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
