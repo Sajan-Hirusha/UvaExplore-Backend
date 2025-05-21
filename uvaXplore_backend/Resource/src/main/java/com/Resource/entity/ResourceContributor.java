@@ -15,6 +15,6 @@ public class ResourceContributor {
     @JoinColumn(name = "resource_id")
     private Resource resource;
 
-    private String userEnrollmentNumber; // Reference to User
-    private String userName; // Denormalized for display
+    private String userEnrollmentNumber;
+
 }

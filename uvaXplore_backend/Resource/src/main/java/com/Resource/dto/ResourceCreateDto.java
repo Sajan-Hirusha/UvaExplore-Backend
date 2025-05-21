@@ -21,5 +21,6 @@ public class ResourceCreateDto {
     private String supervisorEnrollment;
     private String coSupervisorEnrollment;
     private String githubLink;
+    private String sourceCodePath;
 
 }

@@ -19,36 +19,29 @@ public class Resource {
     private Long resourceId;
 
     private String title;
-    private String courseId;  // Reference to Course in AcademicStructure
-    private String courseName; // Denormalized for display
-    private String degreeId;  // Reference to Degree in AcademicStructure
-    private String degreeName; // Denormalized for display
-    private Integer categoryId; // Reference to Category in AcademicStructure
-    private String categoryName; // Denormalized for display
+    private String courseId;
+    private String degreeId;
+    private Integer categoryId;
 
     @Enumerated(EnumType.STRING)
     private ResourceType type;
 
     @Column(length = 3000)
     private String abstractText;
-
     private String documentPath;
     private Boolean isVerified;
     private LocalDateTime uploadAt;
     private String publication;
     private String googleDocLink;
-    private String githubLink;
     private String sourceCodePath;
+
+    // User references
+    private String supervisorEnrollment;
+    private String coSupervisorEnrollment;
 
     @Type(VectorType.class)
     @Column(columnDefinition = "vector(384)")
     private float[] embedding;
-
-    // User references
-    private String supervisorEnrollment;
-    private String supervisorName;
-    private String coSupervisorEnrollment;
-    private String coSupervisorName;
 
     @OneToMany(mappedBy = "resource", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ResourceImage> images = new ArrayList<>();

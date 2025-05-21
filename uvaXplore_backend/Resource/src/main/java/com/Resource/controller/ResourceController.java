@@ -23,9 +23,8 @@ public class ResourceController {
     }
 
     @PostMapping("/createResource")
-    public ResponseEntity<ResourceResponseDto> createResource(@RequestBody ResourceCreateDto dto) {
-        logger.info("Create resource");
-        return ResponseEntity.ok(resourceService.createResource(dto));
+    public ResponseEntity<String> createResource(@RequestBody ResourceCreateDto dto) {
+        return resourceService.createResource(dto);
     }
 
     @PostMapping("/extractText")

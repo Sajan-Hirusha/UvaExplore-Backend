@@ -28,7 +28,7 @@ public class ResourceResponseDto {
     private String message;
     private LocalDateTime timestamp;
     private String courseName;
-    private String degreeName;
+    private String degreeId;
     private String categoryName;
 
     @Data
