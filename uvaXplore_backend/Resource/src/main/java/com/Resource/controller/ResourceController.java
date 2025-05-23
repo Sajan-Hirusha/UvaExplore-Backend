@@ -1,7 +1,6 @@
 package com.Resource.controller;
 
 import com.Resource.dto.ResourceCreateDto;
-import com.Resource.dto.ResourceResponseDto;
 import com.Resource.dto.TextDto;
 import com.Resource.service.ResourceService;
 import org.slf4j.Logger;

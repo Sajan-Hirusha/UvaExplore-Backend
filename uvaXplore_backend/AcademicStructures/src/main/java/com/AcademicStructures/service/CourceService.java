@@ -1,9 +1,9 @@
-package com.AcademicStructures.service
+package com.AcademicStructures.service;
 
 import com.AcademicStructures.entity.Course;
 import com.AcademicStructures.repo.CourseRepository;
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
