@@ -6,7 +6,6 @@
         <artifactId>uvaXplore_backend</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <groupId>com.AcademicStructures</groupId>
     <artifactId>AcademicStructures</artifactId>
     <name>Archetype - AcademicStructures</name>
     <url>http://maven.apache.org</url>
