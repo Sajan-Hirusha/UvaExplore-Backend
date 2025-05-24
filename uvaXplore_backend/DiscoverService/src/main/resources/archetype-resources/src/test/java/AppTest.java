@@ -1,4 +1,4 @@
-package $org.abccompany;
+package $com.UvaExploreBackend;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

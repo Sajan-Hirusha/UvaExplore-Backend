@@ -1,4 +1,4 @@
-package $org.abccompany;
+package $com.UvaExploreBackend;
 
 /**
  * Hello world!
